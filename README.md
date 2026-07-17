@@ -9,6 +9,8 @@ Japan Immigration Live Queue · Public Beta
 **First developed:** 2026  
 **Live site:** https://japan-queue-live.pages.dev
 
+
+
 ## About
 
 Japan Queue Live is an independent multilingual public queue information tool for Japan.
