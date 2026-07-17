@@ -57,12 +57,34 @@
       <div class="field">
         <label for="service" data-i18n="service">窗口服務</label>
         <select id="service">
-          <option value="permission">許可證印 / Permission</option>
-        </select>
+  <option value="application">
+    在留・認定申請 / Application
+  </option>
+
+  <option value="permission">
+    許可証印 / Permission
+  </option>
+
+  <option value="residence-card">
+    在留カード・再入国・届出等 / Residence Card・Re-entry・Notification
+  </option>
+
+  <option value="consultation">
+    行政相談 / Consultation
+  </option>
+
+  <option value="permanent-card-renewal">
+    永住者在留カード有効期間更新 / Permanent Resident Card Renewal
+  </option>
+
+  <option value="others">
+    その他 / Others
+  </option>
+</select>
       </div>
       <div class="field field-number">
-        <label for="ticket" data-i18n="yourNumber">你的號碼</label>
-        <input id="ticket" type="number" inputmode="numeric" min="1" max="99999" placeholder="1118">
+        <label for="ticket" data-i18n="queryNumber">输入查询号码</label>
+        <input   id="ticket"   type="number"   inputmode="numeric"   min="1"   max="9999"   placeholder=""   autocomplete="off" >
       </div>
       <button id="checkBtn" class="primary" type="button" data-i18n="check">查詢進度</button>
     </section>
