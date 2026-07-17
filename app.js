@@ -103,7 +103,7 @@ function render(){
     ? `${queue.updatedAt.replace("T"," ").slice(0,16)}${queue.stale ? " · STALE" : ""}`
     : (queue?.manual?t("manual"):"—");
   const target=parseInt($("ticket").value,10);
-  if(!queue || !Number.isFinite(target) || queue.stale){
+  if(!queue || !Number.isFinite(target)){
     $("remainingNumber").textContent="—";$("eta").textContent="—";$("confidence").textContent=t("collecting");
     $("statusTitle").textContent=queue?.stale ? "官方資料已過期" : (queue?t("enterNumber"):t("noData"));
     $("statusMessage").textContent=t("enterNumberHelp");$("statusBadge").textContent="READY";
