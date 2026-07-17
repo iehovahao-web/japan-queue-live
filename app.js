@@ -1,7 +1,7 @@
 
 const i18n = {
   "zh-Hant":{
-    eyebrow:"日本公共叫號智能平台",headline:"少一點等待，多一點掌控。",lead:"輸入你的號碼，立即查看目前進度、剩餘號碼與返回建議。",
+    eyebrow:"日本入管即時叫號公共測試版",headline:"少一點等待，多一點掌控。",lead:"輸入你的號碼，立即查看目前進度、剩餘號碼與返回建議。",
     loading:"正在連接官方資料",connected:"官方資料已連接",failed:"官方連線失敗 · 可使用手動模式",office:"機構",service:"窗口服務",queryNumber:"輸入查詢號碼",check:"查詢進度",
     callingNow:"目前叫號",remaining:"前面還有",numbers:"個號碼",waitingPeople:"官方等待人數",people:"人",estimate:"智能估算",collecting:"等待更多樣本",
     recommendation:"即時建議",enterNumber:"請輸入你的號碼",enterNumberHelp:"系統會根據官方最新叫號給出返回建議。",progress:"到號進度",
@@ -13,7 +13,7 @@ const i18n = {
     noData:"尚無可信資料",manual:"手動資料"
   },
   ja:{
-    eyebrow:"日本の公共呼出しインテリジェンス",headline:"待つ時間を減らし、行動を最適化。",lead:"番号を入力すると、現在の呼出し、残り件数、戻る目安を確認できます。",
+    eyebrow:"日本入管リアルタイム呼出し 公開ベータ版",headline:"待つ時間を減らし、行動を最適化。",lead:"番号を入力すると、現在の呼出し、残り件数、戻る目安を確認できます。",
     loading:"公式データに接続中",connected:"公式データに接続済み",failed:"公式接続に失敗 · 手動モードを利用できます",office:"機関",service:"窓口サービス",queryNumber:"照会番号を入力",check:"進捗を確認",
     callingNow:"現在の呼出し",remaining:"残り番号",numbers:"件",waitingPeople:"公式待ち人数",people:"人",estimate:"スマート予測",collecting:"サンプル収集中",
     recommendation:"リアルタイム案内",enterNumber:"番号を入力してください",enterNumberHelp:"公式の最新呼出しに基づいて戻る目安を表示します。",progress:"呼出し進捗",
@@ -25,7 +25,7 @@ const i18n = {
     noData:"信頼できるデータなし",manual:"手動データ"
   },
   en:{
-    eyebrow:"Public Queue Intelligence for Japan",headline:"Less waiting. More control.",lead:"Enter your ticket number to see the live call, remaining numbers and when to return.",
+    eyebrow:"Japan Immigration Live Queue · Public Beta",headline:"Less waiting. More control.",lead:"Enter your ticket number to see the live call, remaining numbers and when to return.",
     loading:"Connecting to official data",connected:"Official data connected",failed:"Official connection failed · Manual mode available",office:"Office",service:"Service",queryNumber:"Enter ticket number",check:"Check progress",
     callingNow:"Calling now",remaining:"Numbers ahead",numbers:"numbers",waitingPeople:"Official waiting count",people:"people",estimate:"Smart estimate",collecting:"Collecting samples",
     recommendation:"Live recommendation",enterNumber:"Enter your number",enterNumberHelp:"Recommendations are based on the latest official call number.",progress:"Queue progress",
