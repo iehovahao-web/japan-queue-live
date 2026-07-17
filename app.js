@@ -10,7 +10,8 @@ const i18n = {
     openOfficial:"打開官方頁面 ↗",manualFallback:"官方資料無法連接？使用手動模式",apply:"套用",disclaimer:"非政府官方服務。請以現場螢幕及廣播為準。",
     safeTitle:"目前仍有距離",safeMsg:n=>`前面約有 ${n} 個號碼。保持關注，不要離開太遠。`,watchTitle:"請準備返回",watchMsg:n=>`只剩 ${n} 個號碼。建議現在返回大廳。`,
     urgentTitle:"請留在窗口附近",urgentMsg:n=>`只剩 ${n} 個號碼。不要再離開窗口區域。`,nowTitle:"已到號或可能過號",nowMsg:"立即前往窗口；若已過號，請直接詢問工作人員。",
-    noData:"尚無可信資料",manual:"手動資料"
+    noData:"尚無可信資料",manual:"手動資料" ,developer:"開發者：Ludwig Cheung",
+version:"V1.1 公共測試版",
   },
   ja:{
     eyebrow:"日本入管リアルタイム呼出し 公開ベータ版",headline:"待つ時間を減らし、行動を最適化。",lead:"番号を入力すると、現在の呼出し、残り件数、戻る目安を確認できます。",
@@ -22,7 +23,8 @@ const i18n = {
     openOfficial:"公式ページを開く ↗",manualFallback:"公式データに接続できない場合：手動モード",apply:"適用",disclaimer:"政府公式サービスではありません。現地表示・放送を優先してください。",
     safeTitle:"まだ余裕があります",safeMsg:n=>`前に約${n}件あります。遠くへ離れず、随時確認してください。`,watchTitle:"戻る準備をしてください",watchMsg:n=>`残り${n}件です。今から庁舎へ戻ることを推奨します。`,
     urgentTitle:"窓口付近で待機してください",urgentMsg:n=>`残り${n}件です。窓口エリアから離れないでください。`,nowTitle:"呼出し済み、または番号超過",nowMsg:"直ちに窓口へ。番号を過ぎた場合は職員に確認してください。",
-    noData:"信頼できるデータなし",manual:"手動データ"
+    noData:"信頼できるデータなし",manual:"手動データ" ,developer:"開発者：Ludwig Cheung",
+version:"V1.1 公開ベータ版",
   },
   en:{
     eyebrow:"Japan Immigration Live Queue · Public Beta",headline:"Less waiting. More control.",lead:"Enter your ticket number to see the live call, remaining numbers and when to return.",
@@ -34,7 +36,8 @@ const i18n = {
     openOfficial:"Open official page ↗",manualFallback:"Official data unavailable? Use manual mode",apply:"Apply",disclaimer:"Not a government service. On-site screens and announcements take priority.",
     safeTitle:"You still have time",safeMsg:n=>`About ${n} numbers remain ahead. Keep monitoring and stay nearby.`,watchTitle:"Prepare to return",watchMsg:n=>`Only ${n} numbers remain. Return to the building now.`,
     urgentTitle:"Stay near the counter",urgentMsg:n=>`Only ${n} numbers remain. Do not leave the counter area.`,nowTitle:"Called or possibly missed",nowMsg:"Go to the counter immediately. If your number passed, ask a staff member.",
-    noData:"No trusted data",manual:"Manual data"
+    noData:"No trusted data",manual:"Manual data" ,developer:"Developed by Ludwig Cheung",
+version:"V1.1 Public Beta",
   }
 };
 
