@@ -11,8 +11,11 @@ const SERVICES=[
 ];
 
 export async function onRequestGet(){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),8000);
   try{
     const response=await fetch(SOURCE,{
+      signal:controller.signal,
       headers:{
         "User-Agent":"JapanQueueLive/1.1",
         "Accept":"text/html,application/xhtml+xml"
@@ -41,11 +44,13 @@ export async function onRequestGet(){
       services:parsed.services,
       updatedAt:parsed.updatedAt,
       staleMinutes,
-      stale:staleMinutes===null||staleMinutes>MAX_STALE_MINUTES,
+      stale:staleMinutes===null||staleMinutes>MAX_STALE_MINUTES||Date.parse(parsed.updatedAt)>Date.now()+5*60000,
       source:SOURCE
     },200,60);
   }catch(error){
-    return json({ok:false,code:"FETCH_FAILED",error:error.message||"Fetch failed"},500);
+    return json({ok:false,code:"FETCH_FAILED",error:"Official source unavailable"},502);
+  }finally{
+    clearTimeout(timeout);
   }
 }
 
@@ -92,7 +97,9 @@ export function parseOfficialPage(html){
 
   if(updated){
     const[,y,m,d,h,min]=updated;
-    updatedAt=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}T${String(h).padStart(2,"0")}:${min}:00+09:00`;
+    const candidate=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}T${String(h).padStart(2,"0")}:${min}:00+09:00`;
+    const time=Date.parse(candidate);
+    if(Number.isFinite(time)&&new Date(time+9*3600000).toISOString().slice(0,16)===candidate.slice(0,16))updatedAt=candidate;
   }
 
   return{services,updatedAt};

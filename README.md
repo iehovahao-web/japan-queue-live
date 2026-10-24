@@ -4,7 +4,7 @@
 日本入管リアルタイム呼出し 公開ベータ版  
 Japan Immigration Live Queue · Public Beta
 
-**Version:** V1.1 Public Beta  
+**Version:** V1.2 Public Beta  
 **Developer:** Ludwig Cheung  
 **First developed:** 2026  
 **Live site:** https://japan-queue-live.pages.dev
@@ -90,3 +90,15 @@ Japan Queue Live and the JQL visual identity were created by Ludwig Cheung.
 ## License
 
 All rights reserved. No permission is granted to copy, redistribute, modify, or commercially reuse this project without prior written authorization.
+
+
+## V1.2 data-integrity fixes
+
+- Expired, previous-day, invalid-time or missing data cannot produce queue progress or action advice.
+- Ticket and manual numbers are checked as bounded whole numbers.
+- Manual reference data is isolated by service, labelled clearly and expires after five minutes. Switching services cannot refresh another service’s old official data.
+- All displayed update times use Japan time. The browser rechecks validity as time passes.
+- No ETA or confidence percentage is shown without a validated model.
+- Missing icon resources were replaced with an included SVG; the service-worker cache references only shipped files. Physical-device PWA installation remains outside this regression check.
+
+Run `npm test` and `npm run check` for the parser/API and rendered-state regressions. Public-beta and non-government status still apply; this is not a commercial-readiness certification.

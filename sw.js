@@ -1,12 +1,11 @@
-const CACHE="jql-v3-safe-multi-service";
+const CACHE="jql-v4-data-integrity";
 const ASSETS=[
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
-  "./assets/icon-192.png",
-  "./assets/icon-512.png",
+  "./assets/icon.svg",
   "./privacy.html",
   "./terms.html"
 ];

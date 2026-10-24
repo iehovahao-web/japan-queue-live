@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="JQL">
   <meta name="description" content="Japan Queue Live — 日本入管即時叫號公共測試版">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./assets/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
   <link rel="stylesheet" href="./styles.css">
   <title>Japan Queue Live</title>
 </head>
@@ -157,10 +157,11 @@
       <details>
         <summary data-i18n="manualFallback">官方資料無法連接？使用手動模式</summary>
         <div class="manual-row">
-          <input id="manualCurrent" type="number" inputmode="numeric" placeholder="目前叫號">
-          <input id="manualWaiting" type="number" inputmode="numeric" placeholder="等待人數">
-          <button id="manualBtn" type="button" data-i18n="apply">套用</button>
+          <input id="manualCurrent" type="number" inputmode="numeric" min="0" max="9999" step="1" placeholder="目前叫號">
+          <input id="manualWaiting" type="number" inputmode="numeric" min="0" max="10000" step="1" placeholder="等待人數">
+          <button id="manualBtn" type="button" data-i18n="apply">套用</button><button id="officialMode" type="button" data-i18n="officialMode" hidden>使用官方資料</button>
         </div>
+        <p id="manualError" role="alert" aria-live="polite"></p>
       </details>
     </section>
   </main>
@@ -170,7 +171,7 @@
     JQL · Japan Queue Live<br>
     © 2026 Japan Queue Live<br>
     <span data-i18n="developer">開發者：Ludwig Cheung</span><br>
-    <span data-i18n="version">V1.1 公共測試版</span>
+    <span data-i18n="version">V1.2 公共測試版</span>
   </span>
 
   <span>
