@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseOfficialPage,onRequestGet} from '../functions/api/queue.js';
 const services=[['在留・認定申請','Application'],['許可証印','Permission'],['在留カード・再入国・届出等','Residence Card'],['行政相談','Consultation'],['永住者在留カード有効期間更新','Permanent Resident'],['その他','Others']];
-function fixture(stamp='2026-10-24 13:00'){return '<html><body>'+services.map(([jp,en],i)=>`${i+1} ${jp} ${i+1} ${en} ${100+i} 3 人`).join(' ')+` ${stamp} 現在</body></html>`;}
+// Same table shape as the official page: label | calling now | called (recent) | waiting.
+function fixture(stamp='2026-10-24 13:00'){return '<html><body><table><tbody>'+services.map(([jp,en],i)=>`<tr><td>${i+1}  ${jp}<br>${i+1}  ${en}</td><td>${100+i}</td><td>${String(10+i).padStart(3,'0')} ${90+i} </td><td>3人</td></tr>`).join('')+`</tbody></table><p align='right'>${stamp}現在</p></body></html>`;}
 test('all six official service rows parse without confusing their call numbers',()=>{const data=parseOfficialPage(fixture());assert.equal(Object.keys(data.services).length,6);assert.equal(data.services.permission.current,101);assert.equal(data.updatedAt,'2026-10-24T13:00:00+09:00');});
 test('missing table fails closed and invalid calendar timestamps cannot become fresh',()=>{assert.equal(parseOfficialPage('<html>no official table</html>'),null);assert.equal(parseOfficialPage(fixture('2026-02-31 13:00')).updatedAt,null);});
 test('upstream HTTP and transport failures return no queue data',async()=>{const original=globalThis.fetch;try{globalThis.fetch=async()=>new Response('no',{status:503});let res=await onRequestGet();assert.equal(res.status,502);assert.equal((await res.json()).ok,false);globalThis.fetch=async()=>{throw Error('network');};res=await onRequestGet();assert.equal(res.status,502);assert.equal((await res.json()).code,'FETCH_FAILED');}finally{globalThis.fetch=original;}});

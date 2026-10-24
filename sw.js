@@ -1,4 +1,4 @@
-const CACHE="jql-v4-data-integrity";
+const CACHE="jql-v5-table-parser";
 const ASSETS=[
   "./",
   "./index.html",
@@ -7,7 +7,8 @@ const ASSETS=[
   "./manifest.webmanifest",
   "./assets/icon.svg",
   "./privacy.html",
-  "./terms.html"
+  "./terms.html",
+  "./legal.css"
 ];
 
 self.addEventListener("install",event=>{
@@ -24,15 +25,19 @@ self.addEventListener("activate",event=>{
 });
 
 self.addEventListener("fetch",event=>{
-  if(event.request.url.includes("/api/"))return;
+  const request=event.request,url=new URL(request.url);
+  // Live queue data is never served from cache.
+  if(request.method!=="GET"||url.origin!==self.location.origin||url.pathname.includes("/api/"))return;
 
   event.respondWith(
-    fetch(event.request)
+    fetch(request)
       .then(response=>{
-        const copy=response.clone();
-        caches.open(CACHE).then(cache=>cache.put(event.request,copy));
+        if(response.ok&&response.type==="basic"){
+          const copy=response.clone();
+          caches.open(CACHE).then(cache=>cache.put(request,copy));
+        }
         return response;
       })
-      .catch(()=>caches.match(event.request))
+      .catch(()=>caches.match(request).then(hit=>hit||(request.mode==="navigate"?caches.match("./index.html"):undefined)))
   );
 });

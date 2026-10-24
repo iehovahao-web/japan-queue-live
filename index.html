@@ -83,8 +83,8 @@
 </select>
       </div>
       <div class="field field-number">
-        <label for="ticket" data-i18n="queryNumber">输入查询号码</label>
-        <input   id="ticket"   type="number"   inputmode="numeric"   min="1"   max="9999"   placeholder=""   autocomplete="off" >
+        <label for="ticket" data-i18n="queryNumber">輸入查詢號碼</label>
+        <input id="ticket" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="" autocomplete="off" aria-describedby="statusMessage">
       </div>
       <button id="checkBtn" class="primary" type="button" data-i18n="check">查詢進度</button>
     </section>
@@ -154,11 +154,11 @@
     </section>
 
     <section class="manual glass">
-      <details>
+      <details id="manualDetails">
         <summary data-i18n="manualFallback">官方資料無法連接？使用手動模式</summary>
         <div class="manual-row">
-          <input id="manualCurrent" type="number" inputmode="numeric" min="0" max="9999" step="1" placeholder="目前叫號">
-          <input id="manualWaiting" type="number" inputmode="numeric" min="0" max="10000" step="1" placeholder="等待人數">
+          <input id="manualCurrent" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="目前叫號">
+          <input id="manualWaiting" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="等待人數">
           <button id="manualBtn" type="button" data-i18n="apply">套用</button><button id="officialMode" type="button" data-i18n="officialMode" hidden>使用官方資料</button>
         </div>
         <p id="manualError" role="alert" aria-live="polite"></p>
@@ -171,12 +171,12 @@
     JQL · Japan Queue Live<br>
     © 2026 Japan Queue Live<br>
     <span data-i18n="developer">開發者：Ludwig Cheung</span><br>
-    <span data-i18n="version">V1.2 公共測試版</span>
+    <span data-i18n="version">V1.3 公共測試版</span>
   </span>
 
   <span>
-    <a href="./privacy.html">Privacy</a> ·
-    <a href="./terms.html">Terms</a><br>
+    <a href="./privacy.html" data-i18n="privacy">隱私</a> ·
+    <a href="./terms.html" data-i18n="terms">條款</a><br>
     <span data-i18n="disclaimer">
       非政府官方服務。請以現場螢幕及廣播為準。
     </span>

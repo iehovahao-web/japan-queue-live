@@ -9,7 +9,7 @@ const i18n = {
     openOfficial:"打開官方頁面 ↗",manualFallback:"官方資料無法連接？使用手動模式",apply:"套用",disclaimer:"非政府官方服務。請以現場螢幕及廣播為準。",
     safeTitle:"目前仍有距離",safeMsg:n=>`前面約有 ${n} 個號碼。保持關注，不要離開太遠。`,watchTitle:"請準備返回",watchMsg:n=>`只剩 ${n} 個號碼。建議現在返回大廳。`,
     urgentTitle:"請留在窗口附近",urgentMsg:n=>`只剩 ${n} 個號碼。不要再離開窗口區域。`,nowTitle:"已到號或可能過號",nowMsg:"立即前往窗口；若已過號，請直接詢問工作人員。",
-    noData:"尚無可信資料",manual:"手動資料",developer:"開發者：Ludwig Cheung",version:"V1.2 公共測試版",
+    noData:"尚無可信資料",manual:"手動資料",developer:"開發者：Ludwig Cheung",version:"V1.3 公共測試版",
     services:{
       application:"在留・認定申請 / Application",
       permission:"許可證印 / Permission",
@@ -29,7 +29,7 @@ const i18n = {
     openOfficial:"公式ページを開く ↗",manualFallback:"公式データに接続できない場合：手動モード",apply:"適用",disclaimer:"政府公式サービスではありません。現地表示・放送を優先してください。",
     safeTitle:"まだ余裕があります",safeMsg:n=>`前に約${n}件あります。遠くへ離れず、随時確認してください。`,watchTitle:"戻る準備をしてください",watchMsg:n=>`残り${n}件です。今から庁舎へ戻ることを推奨します。`,
     urgentTitle:"窓口付近で待機してください",urgentMsg:n=>`残り${n}件です。窓口エリアから離れないでください。`,nowTitle:"呼出し済み、または番号超過",nowMsg:"直ちに窓口へ。番号を過ぎた場合は職員に確認してください。",
-    noData:"信頼できるデータなし",manual:"手動データ",developer:"開発者：Ludwig Cheung",version:"V1.2 公開ベータ版",
+    noData:"信頼できるデータなし",manual:"手動データ",developer:"開発者：Ludwig Cheung",version:"V1.3 公開ベータ版",
     services:{
       application:"在留・認定申請 / Application",
       permission:"許可証印 / Permission",
@@ -49,7 +49,7 @@ const i18n = {
     openOfficial:"Open official page ↗",manualFallback:"Official data unavailable? Use manual mode",apply:"Apply",disclaimer:"Not a government service. On-site screens and announcements take priority.",
     safeTitle:"You still have time",safeMsg:n=>`About ${n} numbers remain ahead. Keep monitoring and stay nearby.`,watchTitle:"Prepare to return",watchMsg:n=>`Only ${n} numbers remain. Return to the building now.`,
     urgentTitle:"Stay near the counter",urgentMsg:n=>`Only ${n} numbers remain. Do not leave the counter area.`,nowTitle:"Called or possibly missed",nowMsg:"Go to the counter immediately. If your number passed, ask a staff member.",
-    noData:"No trusted data",manual:"Manual data",developer:"Developed by Ludwig Cheung",version:"V1.2 Public Beta",
+    noData:"No trusted data",manual:"Manual data",developer:"Developed by Ludwig Cheung",version:"V1.3 Public Beta",
     services:{
       application:"Application",
       permission:"Permission",
@@ -86,7 +86,12 @@ const safetyCopy={
     "officialMode": "使用官方資料",
     "manualCurrentLabel": "手動目前號碼",
     "waitingInput": "手動等待人數（可不填）",
-    "officeName": "大阪出入國在留管理局"
+    "officeName": "大阪出入國在留管理局",
+    "install": "安裝",
+    "addHome": "加入主畫面",
+    "iosHelp": "Safari：點擊分享按鈕，再選擇「加入主畫面」。",
+    "privacy": "隱私",
+    "terms": "條款"
   },
   "ja": {
     "staleTitle": "データの有効期限が切れています",
@@ -102,7 +107,12 @@ const safetyCopy={
     "officialMode": "公式データを使用",
     "manualCurrentLabel": "手動の現在番号",
     "waitingInput": "手動の待ち人数（任意）",
-    "officeName": "大阪出入国在留管理局"
+    "officeName": "大阪出入国在留管理局",
+    "install": "インストール",
+    "addHome": "ホーム画面に追加",
+    "iosHelp": "Safari：共有ボタンをタップし、「ホーム画面に追加」を選んでください。",
+    "privacy": "プライバシー",
+    "terms": "利用規約"
   },
   "en": {
     "staleTitle": "Data is out of date",
@@ -118,31 +128,46 @@ const safetyCopy={
     "officialMode": "Use official data",
     "manualCurrentLabel": "Manual current number",
     "waitingInput": "Manual waiting count (optional)",
-    "officeName": "Osaka Regional Immigration Services Bureau"
+    "officeName": "Osaka Regional Immigration Services Bureau",
+    "install": "Install",
+    "addHome": "Add to Home Screen",
+    "iosHelp": "In Safari, tap Share, then choose “Add to Home Screen”.",
+    "privacy": "Privacy",
+    "terms": "Terms"
   }
 };
 Object.keys(safetyCopy).forEach(key=>Object.assign(i18n[key],safetyCopy[key]));
 
-const OFFICIAL_MAX_AGE=120*60*1000;
+// Keep in sync with MAX_STALE_MINUTES in functions/api/queue.js.
+const OFFICIAL_MAX_AGE=30*60*1000;
 const MANUAL_MAX_AGE=5*60*1000;
 const FUTURE_TOLERANCE=5*60*1000;
 const manualByService={};
+// Each service has its own number range, so a ticket typed for one service must never be compared with another.
+const ticketByService={};
+let activeService=null;
 let queue=null;
 let deferredPrompt=null;
 let lastLoadFailed=false;
+// Difference between server time and this device clock, measured on each successful load.
+// Data age is judged on server time, so a device clock that is behind cannot make old data look fresh.
+let clockSkew=0;
+function nowMs(){return Date.now()+clockSkew;}
 function readSavedLanguage(){try{return localStorage.getItem("jql-lang");}catch(_){return null;}}
 let lang=readSavedLanguage()||"zh-Hant";
 if(!i18n[lang])lang="zh-Hant";
 const $=id=>document.getElementById(id);
+const isiOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 function t(k){return i18n[lang][k]??k;}
 function parseInteger(value,min,max){
-  const raw=String(value??"").trim();
+  // NFKC turns full-width digits typed with a Japanese or Chinese IME (１２３) into 123.
+  const raw=String(value??"").normalize("NFKC").trim();
   if(!/^\d{1,5}$/.test(raw))return null;
   const number=Number(raw);
   return Number.isSafeInteger(number)&&number>=min&&number<=max?number:null;
 }
 function tokyoDay(time){return new Date(time+9*60*60*1000).toISOString().slice(0,10);}
-function isTrusted(service,now=Date.now()){
+function isTrusted(service,now=nowMs()){
   if(!service||!Number.isInteger(service.current)||service.current<0||service.current>9999)return false;
   const time=Date.parse(service.updatedAt);
   if(!Number.isFinite(time)||time-now>FUTURE_TOLERANCE||tokyoDay(time)!==tokyoDay(now))return false;
@@ -160,7 +185,12 @@ function normalizeOfficial(data){
   }
   return {services};
 }
-function currentService(){const key=$("service").value;return manualByService[key]??queue?.services?.[key]??null;}
+function currentService(){
+  const key=$("service").value,manual=manualByService[key],official=queue?.services?.[key]??null;
+  // An expired manual reference must not hide this service's fresh official data.
+  if(manual&&!isTrusted(manual)&&official&&isTrusted(official)){delete manualByService[key];return official;}
+  return manual??official;
+}
 function formatTime(value){
   const time=Date.parse(value);
   if(!Number.isFinite(time))return "—";
@@ -173,6 +203,7 @@ function applyLanguage(){
   $("office").options[0].textContent=t("officeName");
   $("manualCurrent").placeholder=t("manualCurrentLabel");$("manualCurrent").setAttribute("aria-label",t("manualCurrentLabel"));
   $("manualWaiting").placeholder=t("waitingInput");$("manualWaiting").setAttribute("aria-label",t("waitingInput"));
+  $("installBtn").textContent=isiOS?t("addHome"):t("install");
   try{localStorage.setItem("jql-lang",lang);}catch(_){}
   render();
 }
@@ -185,7 +216,10 @@ async function loadQueue(){
   try{
     const response=await fetch("./api/queue",{cache:"no-store",signal:controller.signal});
     if(!response.ok)throw new Error("HTTP "+response.status);
-    queue=normalizeOfficial(await response.json());lastLoadFailed=false;
+    const receivedAt=Date.now(),data=await response.json();
+    queue=normalizeOfficial(data);lastLoadFailed=false;
+    const serverTime=Date.parse(data.checkedAt);
+    if(Number.isFinite(serverTime))clockSkew=serverTime-receivedAt;
   }catch(_){queue=null;lastLoadFailed=true;}
   finally{clearTimeout(timeout);loadInFlight=false;render();}
 }
@@ -204,6 +238,7 @@ function render(){
   $("sourceState").textContent=manual?(trusted?t("manual"):t("manualExpired")):service?(trusted?t("connected"):t("staleSource")):lastLoadFailed?t("failed"):t("noData");
   $("liveDot").className=trusted&&!manual?"dot live":trusted?"dot":"dot error";
   $("officialMode").hidden=!manual;
+  if(manual&&$("manualDetails"))$("manualDetails").open=true;
   const raw=$("ticket").value.trim(),target=parseInteger(raw,1,9999),invalid=raw!==""&&target===null;
   $("ticket").setAttribute("aria-invalid",String(invalid));
   if(invalid){clearAdvice(t("invalidTicket"),t("invalidTicketHelp"),"INVALID");return;}
@@ -223,13 +258,18 @@ function render(){
   $("progressBar").style.width=pct+"%";$("progressLabel").textContent=Math.round(pct)+"%";
   $("mCurrent").textContent=service.current;$("mWarn").textContent=Math.max(start,target-40);$("mTarget").textContent=target;
 }
-$("service").addEventListener("change",()=>{$("manualError").textContent="";render();});
-$("checkBtn").addEventListener("click",render);$("ticket").addEventListener("input",render);
+$("service").addEventListener("change",()=>{
+  if(activeService!==null)ticketByService[activeService]=$("ticket").value;
+  activeService=$("service").value;
+  $("ticket").value=ticketByService[activeService]??"";
+  $("manualError").textContent="";render();
+});
+$("checkBtn").addEventListener("click",render);$("ticket").addEventListener("input",()=>{ticketByService[$("service").value]=$("ticket").value;render();});
 $("manualBtn").addEventListener("click",()=>{
   const current=parseInteger($("manualCurrent").value,0,9999),waitingRaw=$("manualWaiting").value.trim(),waiting=waitingRaw===""?null:parseInteger(waitingRaw,0,10000);
   if(current===null||(waitingRaw!==""&&waiting===null)){$("manualError").textContent=t("invalidManual");return;}
   $("manualError").textContent="";
-  manualByService[$("service").value]={current,waiting,source:"manual",updatedAt:new Date().toISOString(),stale:false};render();
+  manualByService[$("service").value]={current,waiting,source:"manual",updatedAt:new Date(nowMs()).toISOString(),stale:false};render();
 });
 $("officialMode").addEventListener("click",()=>{delete manualByService[$("service").value];render();void loadQueue();});
 setInterval(render,30000);
@@ -241,10 +281,8 @@ window.addEventListener("beforeinstallprompt",e=>{
   $("installBtn").classList.remove("hidden");
 });
 
-const isiOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
-if(isiOS&&!window.matchMedia("(display-mode: standalone)").matches){
+if(isiOS&&!(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)){
   $("installBtn").classList.remove("hidden");
-  $("installBtn").textContent="Add to Home";
 }
 
 $("installBtn").addEventListener("click",async()=>{
@@ -255,7 +293,7 @@ $("installBtn").addEventListener("click",async()=>{
     $("installBtn").classList.add("hidden");
     return;
   }
-  if(isiOS)alert("Safari：點擊分享按鈕，再選擇「加入主畫面」。");
+  if(isiOS)alert(t("iosHelp"));
 });
 
 if("serviceWorker"in navigator){
@@ -263,6 +301,7 @@ if("serviceWorker"in navigator){
 }
 
 
+activeService=$("service").value;
 applyLanguage();
 void loadQueue();
 setInterval(loadQueue,5*60*1000);

@@ -33,13 +33,14 @@ test('valid fresh official numbers still calculate all four recommendation bound
 });
 test('manual entry affects only the selected service and cannot make stale official data fresh',async()=>{
  const b=await browser({stale:true,updatedAt:'2026-10-23T17:14:00+09:00'});b.set('ticket','160');b.set('manualCurrent','100');b.set('manualWaiting','3');b.run("$('manualBtn').listeners.click()");assert.equal(b.el.get('statusBadge').textContent,'MANUAL');assert.equal(b.el.get('remainingNumber').textContent,60);
- b.set('service','permission');b.render();assert.equal(b.el.get('statusBadge').textContent,'STALE');assert.equal(b.el.get('currentNumber').textContent,'—');assert.match(b.el.get('officialUpdated').textContent,/23/);assert.match(b.el.get('officialUpdated').textContent,/STALE/);
+ b.set('service','permission');b.run("$('service').listeners.change()");b.set('ticket','160');b.render();assert.equal(b.el.get('statusBadge').textContent,'STALE');assert.equal(b.el.get('currentNumber').textContent,'—');assert.match(b.el.get('officialUpdated').textContent,/23/);assert.match(b.el.get('officialUpdated').textContent,/STALE/);
 });
 test('invalid manual numbers are rejected and do not replace a known official service',async()=>{
  const b=await browser();b.set('ticket','160');for(const [current,waiting] of [['-1','3'],['10.5','3'],['10000','3'],['100','10001']]){b.set('manualCurrent',current);b.set('manualWaiting',waiting);b.run("$('manualBtn').listeners.click()");assert.notEqual(b.el.get('manualError').textContent,'');assert.equal(b.el.get('currentNumber').textContent,100);}
 });
 test('manual zero is allowed, waiting count is optional, and the reference expires after five minutes',async()=>{
- const b=await browser();b.set('ticket','160');b.set('manualCurrent','0');b.set('manualWaiting','');b.run("$('manualBtn').listeners.click()");assert.equal(b.el.get('statusBadge').textContent,'MANUAL');assert.equal(b.el.get('waitingPeople').textContent,'—');b.advance(5*60*1000+1);b.render();assert.equal(b.el.get('statusBadge').textContent,'STALE');assert.equal(b.el.get('remainingNumber').textContent,'—');
+ // official data for this service is also stale, so nothing fresh can take over after expiry
+ const b=await browser({stale:true,updatedAt:'2026-10-23T17:14:00+09:00'});b.set('ticket','160');b.set('manualCurrent','0');b.set('manualWaiting','');b.run("$('manualBtn').listeners.click()");assert.equal(b.el.get('statusBadge').textContent,'MANUAL');assert.equal(b.el.get('waitingPeople').textContent,'—');b.advance(5*60*1000+1);b.render();assert.equal(b.el.get('statusBadge').textContent,'STALE');assert.equal(b.el.get('remainingNumber').textContent,'—');assert.equal(b.el.get('sourceState').textContent,'Manual data expired');
 });
 test('browser time re-check blocks expired data, previous-Japan-day data, invalid timestamps and future timestamps',async()=>{
  for(const updatedAt of ['invalid','2026-10-24T15:00:00+09:00','2026-10-23T23:59:00+09:00']){const b=await browser({updatedAt});b.set('ticket','160');b.render();assert.equal(b.el.get('statusBadge').textContent,'STALE',updatedAt);}

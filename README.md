@@ -4,7 +4,7 @@
 日本入管リアルタイム呼出し 公開ベータ版  
 Japan Immigration Live Queue · Public Beta
 
-**Version:** V1.2 Public Beta  
+**Version:** V1.3 Public Beta  
 **Developer:** Ludwig Cheung  
 **First developed:** 2026  
 **Live site:** https://japan-queue-live.pages.dev
@@ -92,7 +92,7 @@ Japan Queue Live and the JQL visual identity were created by Ludwig Cheung.
 All rights reserved. No permission is granted to copy, redistribute, modify, or commercially reuse this project without prior written authorization.
 
 
-## V1.2 data-integrity fixes
+## V1.3 data-integrity fixes
 
 - Expired, previous-day, invalid-time or missing data cannot produce queue progress or action advice.
 - Ticket and manual numbers are checked as bounded whole numbers.
