@@ -48,3 +48,6 @@ h1{font-size:clamp(42px,8vw,78px);line-height:1.02;letter-spacing:-.055em;margin
 footer{max-width:1120px;margin:auto;padding:24px;display:flex;justify-content:space-between;color:#68798c;font-size:12px;border-top:1px solid rgba(255,255,255,.06)}
 @media(max-width:850px){.control-panel{grid-template-columns:1fr 1fr}.primary{grid-column:span 2}.dashboard{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.topbar{padding:17px 16px}.brand small{display:none}.mark{width:42px;height:42px}.top-actions .ghost{display:none!important}main{padding:10px 16px 50px}.hero{padding:38px 0 28px}h1{font-size:48px}.control-panel{grid-template-columns:1fr;padding:13px}.primary{grid-column:auto}.dashboard{grid-template-columns:1fr 1fr;gap:10px}.metric{min-height:137px;padding:17px}.metric strong{font-size:37px}.status-card{align-items:flex-start;gap:18px}.status-card h2{font-size:21px}.detail-grid{grid-template-columns:1fr}.manual-row{grid-template-columns:1fr}.manual-row button{width:100%}footer{padding:20px 16px;display:block;line-height:1.8}}
+
+footer a,footer a:visited{color:var(--gold);text-underline-offset:3px}
+footer a:hover{color:var(--text)}
