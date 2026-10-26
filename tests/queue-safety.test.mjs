@@ -12,13 +12,13 @@ async function browser({stale=false,updatedAt=new Date(BASE).toISOString(),saved
  const el=new Map();
  for(const [,id] of html.matchAll(/\bid="([^"]+)"/g))el.set(id,{value:'',textContent:'',hidden:false,className:'',style:{},options:[],attributes:{},listeners:{},classList:{remove(){}},addEventListener(k,fn){this.listeners[k]=fn;},setAttribute(k,v){this.attributes[k]=v;}});
  el.get('service').value='application';el.get('service').options=keys.map(value=>({value,textContent:''}));el.get('office').options=[{textContent:''}];
- let failed=false;
+ let failed=false,requestCount=0;const intervals=[];
  const payload={ok:true,updatedAt,stale,services:Object.fromEntries(keys.map((k,i)=>[k,{current:100+i*100,waiting:3}]))};
  const store=new Map([['jql-lang',savedLanguage]]);
  const doc={documentElement:{lang:''},hidden:false,getElementById:id=>el.get(id),querySelectorAll:()=>[],querySelector:()=>({textContent:''}),addEventListener(){}};
- const context=vm.createContext({document:doc,localStorage:{getItem:k=>store.get(k)??null,setItem:(k,v)=>store.set(k,v)},navigator:{userAgent:'Node'},window:{addEventListener(){}},Date:Clock,Intl,AbortController,console,setInterval(){return 1;},setTimeout(){return 1;},clearTimeout(){},fetch:async()=>{if(failed)throw Error('offline');return{ok:true,json:async()=>structuredClone(payload)};}});
+ const context=vm.createContext({document:doc,localStorage:{getItem:k=>store.get(k)??null,setItem:(k,v)=>store.set(k,v)},navigator:{userAgent:'Node'},window:{addEventListener(){}},Date:Clock,Intl,AbortController,console,setInterval(fn,delay){intervals.push({fn,delay});return intervals.length;},setTimeout(){return 1;},clearTimeout(){},fetch:async()=>{requestCount++;if(failed)throw Error('offline');return{ok:true,json:async()=>structuredClone(payload)};}});
  vm.runInContext(script,context);await new Promise(setImmediate);
- return{el,doc,payload,run:s=>vm.runInContext(s,context),advance:ms=>{now+=ms;},fail:()=>{failed=true;},set:(id,value)=>{el.get(id).value=value;},render:()=>vm.runInContext('render()',context)};
+ return{el,doc,payload,intervals,requests:()=>requestCount,run:s=>vm.runInContext(s,context),advance:ms=>{now+=ms;},fail:()=>{failed=true;},set:(id,value)=>{el.get(id).value=value;},render:()=>vm.runInContext('render()',context)};
 }
 
 test('stale public data never produces numbers-ahead, ETA, progress, or urgent/called advice',async()=>{
@@ -55,4 +55,14 @@ test('manual references can explicitly return to the selected service official d
 test('all three languages explain stale and invalid states; invalid saved language cannot crash initialization',async()=>{
  for(const lang of ['en','ja','zh-Hant']){const b=await browser({stale:true,savedLanguage:lang});b.set('ticket','160');b.render();assert.equal(b.doc.documentElement.lang,lang);assert.equal(b.el.get('statusBadge').textContent,'STALE');assert.notEqual(b.el.get('statusTitle').textContent,'staleTitle');b.set('ticket','-1');b.render();assert.equal(b.el.get('statusBadge').textContent,'INVALID');}
  const b=await browser({savedLanguage:'unknown'});assert.equal(b.doc.documentElement.lang,'zh-Hant');
+});
+
+
+test('visible queue polling refreshes at the official 30-second cadence and skips hidden tabs',async()=>{
+ const b=await browser();const timer=b.intervals.find(x=>x.fn.name==='pollOfficialQueue');assert.ok(timer);assert.equal(timer.delay,30000);
+ const before=b.requests();b.doc.hidden=true;timer.fn();await new Promise(setImmediate);assert.equal(b.requests(),before);
+ b.doc.hidden=false;b.payload.services.application.current=125;timer.fn();await new Promise(setImmediate);assert.equal(b.requests(),before+1);assert.equal(b.el.get('currentNumber').textContent,125);
+});
+test('a polling failure removes official advice without promoting a manual entry to another service',async()=>{
+ const b=await browser();b.set('ticket','160');b.fail();b.run('pollOfficialQueue()');await new Promise(setImmediate);assert.equal(b.el.get('statusBadge').textContent,'NO DATA');assert.equal(b.el.get('remainingNumber').textContent,'—');
 });

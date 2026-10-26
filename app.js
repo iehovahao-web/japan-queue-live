@@ -304,4 +304,6 @@ if("serviceWorker"in navigator){
 activeService=$("service").value;
 applyLanguage();
 void loadQueue();
-setInterval(loadQueue,5*60*1000);
+// Match the official page's 30-second update cadence without polling a hidden tab.
+function pollOfficialQueue(){if(!document.hidden)void loadQueue();}
+setInterval(pollOfficialQueue,30*1000);
