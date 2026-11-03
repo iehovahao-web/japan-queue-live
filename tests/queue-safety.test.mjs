@@ -66,3 +66,18 @@ test('visible queue polling refreshes at the official 30-second cadence and skip
 test('a polling failure removes official advice without promoting a manual entry to another service',async()=>{
  const b=await browser();b.set('ticket','160');b.fail();b.run('pollOfficialQueue()');await new Promise(setImmediate);assert.equal(b.el.get('statusBadge').textContent,'NO DATA');assert.equal(b.el.get('remainingNumber').textContent,'—');
 });
+
+test('a placeholder service never gives advice or reuses its former number while other fresh windows remain usable',async()=>{
+ const b=await browser();b.set('ticket','160');b.render();assert.equal(b.el.get('remainingNumber').textContent,60);
+ b.payload.services.application.current=null;await b.run('loadQueue()');b.render();
+ assert.equal(b.el.get('statusBadge').textContent,'NO DATA');assert.equal(b.el.get('currentNumber').textContent,'—');assert.equal(b.el.get('remainingNumber').textContent,'—');assert.equal(b.el.get('eta').textContent,'—');
+ b.set('service','permission');b.set('ticket','250');b.render();assert.equal(b.el.get('currentNumber').textContent,200);assert.equal(b.el.get('remainingNumber').textContent,50);
+});
+test('all placeholder windows fail safely in every language without losing manual isolation',async()=>{
+ for(const lang of ['en','ja','zh-Hant']){
+  const b=await browser({savedLanguage:lang});for(const key of keys)b.payload.services[key].current=null;await b.run('loadQueue()');b.set('ticket','160');b.render();
+  assert.equal(b.el.get('statusBadge').textContent,'NO DATA');assert.equal(b.el.get('remainingNumber').textContent,'—');
+  b.set('manualCurrent','0');b.set('manualWaiting','');b.run("$('manualBtn').listeners.click()");assert.equal(b.el.get('statusBadge').textContent,'MANUAL');
+  b.set('service','permission');b.render();assert.equal(b.el.get('statusBadge').textContent,'NO DATA');
+ }
+});
