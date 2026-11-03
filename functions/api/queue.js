@@ -71,31 +71,35 @@ export function parseOfficialPage(html){
 
   const services={};
   const rows=body.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi)||[];
+  // Validate the complete known table before accepting partial calling data.
+  if(rows.length!==SERVICES.length)return null;
 
-  for(const row of rows){
-    const cells=(row.match(/<td[^>]*>[\s\S]*?<\/td>/gi)||[]).map(cellText);
-    if(cells.length<4)continue;
-    const [label,calling,,waitingCell]=cells;
-    const lead=label.match(/^(\d)\s*(.*)$/);
-    if(!lead)continue;
-    const def=SERVICES.find(([,num])=>num===lead[1]);
-    if(!def)continue;
-    const [key,,jp]=def;
-    if(!compact(label).includes(compact(jp)))continue;
-    if(services[key])continue;
+  for(const [index,row] of rows.entries()){
+    const rawCells=row.match(/<td[^>]*>[\s\S]*?<\/td>/gi)||[];
+    if(rawCells.length!==4)return null;
+    const cells=rawCells.map(cellText);
+    const [key,num,jp]=SERVICES[index];
+    // The first line is the official Japanese label; the English line is optional.
+    const japaneseLabel=cellText(rawCells[0].split(/<br\s*\/?>/i)[0]);
+    if(compact(japaneseLabel)!==compact(num+jp))return null;
 
-    const callingMatch=calling.match(/^(\d{1,4})$/);
+    const [,calling,,waitingCell]=cells;
     const waitingMatch=waitingCell.match(/^(\d{1,5})\s*人$/);
-    if(!callingMatch||!waitingMatch)continue;
-
-    const current=Number(callingMatch[1]);
+    if(!waitingMatch)return null;
     const waiting=Number(waitingMatch[1]);
-    if(Number.isInteger(current)&&current>=0&&current<=9999&&Number.isInteger(waiting)&&waiting>=0&&waiting<=10000){
-      services[key]={current,waiting};
-    }
-  }
+    if(!Number.isInteger(waiting)||waiting<0||waiting>10000)return null;
 
-  if(Object.keys(services).length<4)return null;
+    // "---" means no current call, never zero. The frontend rejects null for advice.
+    if(calling==="---"){
+      services[key]={current:null,waiting};
+      continue;
+    }
+    const callingMatch=calling.match(/^(\d{1,4})$/);
+    if(!callingMatch)return null;
+    const current=Number(callingMatch[1]);
+    if(!Number.isInteger(current)||current<0||current>9999)return null;
+    services[key]={current,waiting};
+  }
 
   const text=cellText(source);
   const updated=text.match(/(\d{4})-(\d{2})-(\d{2})\s*(\d{1,2}):(\d{2})\s*現在/);
