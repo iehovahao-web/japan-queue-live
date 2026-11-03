@@ -16,17 +16,14 @@ test('real official page: calling-now column is read, never the called list', ()
   });
   assert.equal(data.updatedAt,'2026-10-23T17:14:00+09:00');
 });
-test('row without English name (row 5) is kept; empty calling cell skips only that row', ()=>{
+test('row without English name is supported, but an empty unknown call fails the strict complete-table check', ()=>{
   const html=official.replace('<td align=center>4049</td>','<td align=center></td>');
-  const data=parseOfficialPage(html);
-  assert.equal(data.services['permanent-card-renewal'],undefined);
-  assert.equal(data.services.others.current,5005);
+  assert.equal(parseOfficialPage(official).services['permanent-card-renewal'].current,4049);
+  assert.equal(parseOfficialPage(html),null);
 });
-test('a row whose number and Japanese label disagree is rejected instead of mislabelled', ()=>{
+test('a row whose number and Japanese label disagree rejects the complete table instead of accepting a partial schema', ()=>{
   const html=official.replace('2  許可証印','2  在留・認定申請');
-  const data=parseOfficialPage(html);
-  assert.equal(data.services.permission,undefined);
-  assert.equal(data.services.application.current,159);
+  assert.equal(parseOfficialPage(html),null);
 });
 test('page without a table fails closed', ()=>{
   assert.equal(parseOfficialPage(official.replace(/<tbody>[\s\S]*<\/tbody>/,'<tbody></tbody>')),null);
